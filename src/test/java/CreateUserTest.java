@@ -2,11 +2,22 @@ import dto.CreateUserRequest;
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
+import org.junit.After;
 import org.junit.Test;
+
+import java.util.Objects;
 
 import static org.hamcrest.Matchers.is;
 
 public class CreateUserTest extends AbstractTest {
+    private String token;
+
+    @After
+    public void deleteUser() {
+        if (Objects.nonNull(token)) {
+            deleteUser(token);
+        }
+    }
 
     @Test
     @DisplayName("Создание уникального пользователя")
@@ -20,16 +31,13 @@ public class CreateUserTest extends AbstractTest {
                 .setPassword("1234");
         Response response = createUser(user);
 
-        String token = response.then().assertThat()
+        token = response.then().assertThat()
                 .statusCode(200)
                 .and()
                 .body("success", is(true))
                 .extract()
                 .body()
                 .path("accessToken");
-
-        deleteUser(token).then().assertThat()
-                .statusCode(202);
     }
 
     @Test
@@ -37,14 +45,14 @@ public class CreateUserTest extends AbstractTest {
     @Description("Создание пользователя, который уже зарегистрирован\n" +
             "запрос возвращает правильный код ответа\n" +
             "успешный запрос возвращает success: false")
-    public void CreateDuplicateUserTest(){
+    public void CreateDuplicateUserTest() {
         CreateUserRequest user = new CreateUserRequest()
                 .setName("koshka4")
                 .setEmail(getRandomEmail())
                 .setPassword("1234");
         Response response = createUser(user);
 
-        String token = response.then().assertThat()
+        token = response.then().assertThat()
                 .statusCode(200)
                 .and()
                 .body("success", is(true))
@@ -57,9 +65,6 @@ public class CreateUserTest extends AbstractTest {
                 .statusCode(403)
                 .and()
                 .body("success", is(false));
-
-        deleteUser(token).then().assertThat()
-                .statusCode(202);
     }
 
     @Test

@@ -1,15 +1,14 @@
 import dto.CreateUserRequest;
-import dto.LoginRequest;
 import dto.UpdateUserRequest;
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
-import io.restassured.response.ExtractableResponse;
-import io.restassured.response.Response;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.is;
 
-public class UpdateUserTest extends AbstractTest {
+public class UpdateUserTest extends AbstractTestWithUser {
 
     @Test
     @DisplayName("Изменение имени залогированного пользователя")
@@ -17,13 +16,6 @@ public class UpdateUserTest extends AbstractTest {
             "запрос возвращает правильный код ответа\n" +
             "успешный запрос возвращает success: true")
     public void updateNameLoginUser() {
-        CreateUserRequest user = new CreateUserRequest()
-                .setName("koshka7")
-                .setEmail(getRandomEmail())
-                .setPassword("1234");
-
-        String accessToken = createUserAndGetAccessToken(user);
-
         UpdateUserRequest updateUser = new UpdateUserRequest()
                 .setName("qweqwe");
         updateUser(updateUser, accessToken).then().assertThat()
@@ -31,9 +23,6 @@ public class UpdateUserTest extends AbstractTest {
                 .and()
                 .body("success", is(true))
                 .body("user.name", is("qweqwe"));
-
-        deleteUser(accessToken).then().assertThat()
-                .statusCode(202);
     }
 
     @Test
@@ -42,13 +31,6 @@ public class UpdateUserTest extends AbstractTest {
             "запрос возвращает правильный код ответа\n" +
             "успешный запрос возвращает success: true")
     public void updateEmailLoginUser() {
-        CreateUserRequest user = new CreateUserRequest()
-                .setName("koshka777")
-                .setEmail(getRandomEmail())
-                .setPassword("1234");
-
-        String accessToken = createUserAndGetAccessToken(user);
-
         UpdateUserRequest updateUser = new UpdateUserRequest()
                 .setEmail(getRandomEmail());
         updateUser(updateUser, accessToken).then().assertThat()
@@ -56,9 +38,6 @@ public class UpdateUserTest extends AbstractTest {
                 .and()
                 .body("success", is(true))
                 .body("user.email", is(updateUser.getEmail()));
-
-        deleteUser(accessToken).then().assertThat()
-                .statusCode(202);
     }
 
     @Test
@@ -67,22 +46,12 @@ public class UpdateUserTest extends AbstractTest {
             "запрос возвращает правильный код ответа\n" +
             "успешный запрос возвращает success: true")
     public void updatePasswordLoginUser() {
-        CreateUserRequest user = new CreateUserRequest()
-                .setName("koshka777")
-                .setEmail(getRandomEmail())
-                .setPassword("1234");
-
-        String accessToken = createUserAndGetAccessToken(user);
-
         UpdateUserRequest updateUser = new UpdateUserRequest()
                 .setPassword("qwerty");
         updateUser(updateUser, accessToken).then().assertThat()
                 .statusCode(200)
                 .and()
                 .body("success", is(true));
-
-        deleteUser(accessToken).then().assertThat()
-                .statusCode(202);
     }
 
     @Test
@@ -94,7 +63,7 @@ public class UpdateUserTest extends AbstractTest {
         UpdateUserRequest updateUser = new UpdateUserRequest()
                 .setName("qweqwe");
         updateUser(updateUser, null).then().assertThat()
-               .statusCode(401)
+                .statusCode(401)
                 .and()
                 .body("success", is(false));
     }
@@ -105,14 +74,12 @@ public class UpdateUserTest extends AbstractTest {
             "запрос возвращает правильный код ответа\n" +
             "успешный запрос возвращает success: false")
     public void updateEmailNoLoginUser() {
-
         UpdateUserRequest updateUser = new UpdateUserRequest()
                 .setEmail(getRandomEmail());
         updateUser(updateUser, null).then().assertThat()
                 .statusCode(401)
                 .and()
                 .body("success", is(false));
-
     }
 
     @Test
@@ -127,7 +94,5 @@ public class UpdateUserTest extends AbstractTest {
                 .statusCode(401)
                 .and()
                 .body("success", is(false));
-
     }
-
 }
